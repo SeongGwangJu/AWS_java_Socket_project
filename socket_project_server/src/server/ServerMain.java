@@ -12,6 +12,8 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.JTextArea;
 import java.awt.Color;
+import java.awt.Component;
+
 import javax.swing.JList;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
@@ -33,7 +35,14 @@ public class ServerMain extends JFrame {
 	private JTextArea serverNotiTextArea;
 	private ServerSocket serverSocket;
 	private Socket socket;
+	String ip = "127.0.0.1";
+	int portInt = 8000;
+	String portString = Integer.toString(portInt);
 	
+	public void sysoutTool (String print) {
+		serverNotiTextArea.append(print);
+	}
+
 	public static void main(String[] args) {
 		
 		/*
@@ -73,7 +82,8 @@ public class ServerMain extends JFrame {
 		serverNotiScrollPane.setBounds(12, 81, 310, 470);
 		server.add(serverNotiScrollPane);
 		
-		JTextArea serverNotiTextArea = new JTextArea();
+		serverNotiTextArea = new JTextArea();
+		serverNotiTextArea.setText("소켓채팅 서버에 오신걸 환영합니다.");
 		serverNotiScrollPane.setViewportView(serverNotiTextArea);
 		
 		//서버시작
@@ -81,23 +91,12 @@ public class ServerMain extends JFrame {
 		ServerStartButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(ServerStartButton.isSelected()) {
-					serverNotiTextArea.append("서버를 시작합니다.");
-			       try {
-			            // 서버 소켓 생성 및 클라이언트 연결 대기
-			            ServerSocket serverSocket = new ServerSocket(8000);
-			            System.out.println("서버 시작: 8000 포트에서 클라이언트 연결 대기 중...");
-			            
-			            while(true) {
-			            	Socket socket = serverSocket.accept();
-			            	serverNotiTextArea.append("");
-			            	
-			            }
-			        } catch (IOException e2) {
-			            System.out.println("서버 시작 실패: " + e2.getMessage());
-			        }
-				} else {
+					sysoutTool("\n서버를 시작합니다\n");
+			       startServer();
+				} else if(!serverSocket.isClosed()) {
 					stopServer();
 				}
+				
 			}
 		});
 		
@@ -125,18 +124,20 @@ public class ServerMain extends JFrame {
 		ipArea.setFont(new Font("나눔고딕", Font.PLAIN, 12));
 		ipArea.setForeground(Color.WHITE);
 		ipArea.setBackground(Color.DARK_GRAY);
-		ipArea.setText("127.0.0.1");
 		ipArea.setBounds(208, 10, 56, 15);
 		server.add(ipArea);
+		
+		ipArea.setText(ip);
 		
 		JTextArea portArea = new JTextArea();
 		portArea.setEditable(false);
 		portArea.setFont(new Font("나눔고딕", Font.PLAIN, 12));
-		portArea.setText("8000");
 		portArea.setForeground(Color.WHITE);
 		portArea.setBackground(Color.DARK_GRAY);
 		portArea.setBounds(208, 33, 56, 15);
 		server.add(portArea);
+		
+		portArea.setText(portString);
 		
 		JTextArea userNumArea = new JTextArea();
 		userNumArea.setEditable(false);
@@ -145,15 +146,45 @@ public class ServerMain extends JFrame {
 		userNumArea.setBackground(Color.DARK_GRAY);
 		userNumArea.setBounds(208, 56, 56, 15);
 		server.add(userNumArea);
+		//접속자수 표시
+		userNumArea.setText("추가해야함");
 		
 	}
 	
     private void startServer() {
+    	try {
+            // 서버 소켓 생성 및 클라이언트 연결 대기
+            sysoutTool("서버 시작: "+ portString +"포트에서 클라이언트 연결 전\n");
+
+            ServerSocket serverSocket = new ServerSocket(portInt);
+            sysoutTool("서버 시작: "+ portString +"포트에서 클라이언트와 연결 완료.\n");
+            System.out.println("서버 시작: " + portString + "포트에서 클라이언트 연결 대기 중...");
+            
+            while(true) {
+            	Socket socket = serverSocket.accept();
+            	serverNotiTextArea.append("접속");
+            	System.out.println("누군가 접속");
+            	sysoutTool("드디어 누군가 접속");
+            }
+        } catch (IOException e2) {
+            System.out.println("서버 시작 실패: " + e2.getMessage());
+        }
     }
 
     private void stopServer() {
     	//클라이언트 소켓을 닫고 서버 소켓을 닫아서 클라이언트의 연결을 중단
-    	serverNotiTextArea.append("서버 종료 로직을 구현해야합니다.");
+    	serverNotiTextArea.append("서버 종료 로직을 구현해야합니다.\n");
+        try {
+            if (socket != null) {
+                socket.close();
+            }
+            if (serverSocket != null) {
+                serverSocket.close();
+            }
+            serverNotiTextArea.append("서버가 종료되었습니다.\n");
+        } catch (IOException e) {
+            System.out.println("서버 종료에 실패: " + e.getMessage());
+        }
     }
 	
 }
