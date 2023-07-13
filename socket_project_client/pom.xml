@@ -20,7 +20,12 @@
 	    <version>2.10.1</version>
 	</dependency>
 
-  </dependencies>
+	<dependency>
+		<groupId>aws_java_yuna</groupId>
+		<artifactId>aws_java_yuna</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</dependency>
+    </dependencies>
 
   <build>
     <sourceDirectory>src</sourceDirectory>
