@@ -1,5 +1,12 @@
 package server.dto;
 
-public class SendMessage {
+import lombok.Builder;
+import lombok.Data;
 
+@Builder
+@Data
+public class SendMessage {
+	private String fromUsername;
+	private String toUsername;
+	private String messageBody;
 }
