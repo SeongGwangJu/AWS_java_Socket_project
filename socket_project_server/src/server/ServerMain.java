@@ -1,36 +1,46 @@
 package server;
 
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-
-import server.entity.Room;
-
-import javax.swing.JScrollPane;
-import javax.swing.JToggleButton;
-import java.awt.Font;
-import javax.swing.JLabel;
-import javax.swing.JTextArea;
 import java.awt.Color;
-
+import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JToggleButton;
+import javax.swing.border.EmptyBorder;
+
+import com.google.gson.Gson;
+
+import server.entity.Room;
 
 public class ServerMain extends JFrame {
+	
+	private static ServerMain instance;
+
+	public static ServerMain getInstance() {
+	    if (instance == null) {
+	        instance = new ServerMain();
+	    }
+	    return instance;
+	}
 
 	//ip / port설정
 	String ip = "127.0.0.1";
 	int port = 8000;
-	String portString = Integer.toString(port);
+	int userNum = 0;
+	String userNumString = Integer.toString(userNum);
 	
 	//서버 GUI 출력메서드 
 	public void sysoutGUI (String print) {
@@ -43,6 +53,8 @@ public class ServerMain extends JFrame {
 	private JTextArea serverNotiTextArea;
 	private ServerSocket serverSocket;
 	private Socket socket;
+	private JTextArea userNumArea;
+	private Gson gson;
 	
 	public static List<ConnectedSocket> connectedSocketList = new ArrayList<>();
 	public static List<Room> roomList = new ArrayList<>();
@@ -64,6 +76,8 @@ public class ServerMain extends JFrame {
 
 	
 	public ServerMain() {
+		setResizable(false);
+		setAlwaysOnTop(true);
 		
 		// <<<GUI기본 Panel 설정>>>
 		setBackground(new Color(128, 128, 128));
@@ -83,7 +97,7 @@ public class ServerMain extends JFrame {
 		mainPanel.add(serverNotiScrollPane);
 		
 		serverNotiTextArea = new JTextArea();
-		serverNotiTextArea.setText("소켓채팅 서버에 오신걸 환영합니다.");
+		serverNotiTextArea.setText("소켓채팅 서버에 오신걸 환영합니다.\n");
 		serverNotiScrollPane.setViewportView(serverNotiTextArea);
 		
 		// <<< 서버시작 버튼 >>>
@@ -92,11 +106,10 @@ public class ServerMain extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if(ServerStartButton.isSelected()) {
 					startServer();
-					
+
 				} else if(!ServerStartButton.isSelected()){
 					stopServer();
 				}
-				
 			}
 		});
 		ServerStartButton.setFont(new Font("나눔고딕 ExtraBold", Font.PLAIN, 15));
@@ -126,6 +139,7 @@ public class ServerMain extends JFrame {
 		ipArea.setBounds(208, 10, 56, 15);
 		mainPanel.add(ipArea);
 		ipArea.setText(ip); //ip 변수set
+		
 		JTextArea portArea = new JTextArea();
 		portArea.setEditable(false);
 		portArea.setFont(new Font("나눔고딕", Font.PLAIN, 12));
@@ -133,43 +147,61 @@ public class ServerMain extends JFrame {
 		portArea.setBackground(Color.DARK_GRAY);
 		portArea.setBounds(208, 33, 56, 15);
 		mainPanel.add(portArea);
-		portArea.setText(portString); //port변수
-		JTextArea userNumArea = new JTextArea();
-		userNumArea.setEditable(false);
+		portArea.setText(""+port); //port변수
+		
+		userNumArea = new JTextArea();
 		userNumArea.setFont(new Font("나눔고딕", Font.PLAIN, 13));
 		userNumArea.setForeground(Color.WHITE);
 		userNumArea.setBackground(Color.DARK_GRAY);
 		userNumArea.setBounds(208, 56, 56, 15);
 		mainPanel.add(userNumArea);
-		userNumArea.setText("구현해야함"); //접속자수 표시
+		userNumArea.setText("" + userNum); //접속자수 표시
 		
 	}
 	
 	// <<< 서버시작기능 >>>
     private void startServer() {
-    	try {
-            // 서버 소켓 생성 및 클라이언트 연결 대기
-            sysoutGUI("클라이언트 연결을 시도합니다.");
-            this.serverSocket = new ServerSocket(port);
-            sysoutGUI("서버 시작: "+ portString +"포트에서 클라이언트 연결을 시도합니다.");
-           
-            while(true) {
-				sysoutGUI("accept 전");
-            	this.socket = serverSocket.accept();
-            	sysoutGUI("accept 성공");
-				ConnectedSocket connectedSocket = new ConnectedSocket(socket);
-				connectedSocket.start();
-				connectedSocketList.add(connectedSocket);
-            }
-        } catch (IOException e) {
-            sysoutGUI("서버 시작 실패: " + e.getMessage());
-        }
+    	//백그라운드에서 무한루프 돌리기 위해 Thread사용.
+    	Thread thread = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				
+				try {
+		            serverSocket = new ServerSocket(port);
+		            sysoutGUI("서버 시작: 포트 "+ port +"번 에서 연결을 시도합니다.");
+
+		        	userNumArea.setText("" + userNum);
+		            while(true) {
+		            	socket = serverSocket.accept();
+						ConnectedSocket connectedSocket = new ConnectedSocket(socket);
+						connectedSocket.start();
+						connectedSocketList.add(connectedSocket);
+		            	userNum += 1;
+
+						sysoutGUI("클라이언트" +userNum+" 연결됨"); //나중에 username으로 수정해야함 완성후!
+						
+		            	//접속자 수 업데이트, EDT(EventDispatchThread)사용.
+	                    EventQueue.invokeLater(new Runnable() {
+	                        public void run() {
+	                            userNumArea.setText("" + userNum); // userNumArea에 접속자 수 반영
+	                        }
+	                    });
+		            }
+				} catch (BindException e){ 
+					sysoutGUI("서버시작 실패 : 서버가 이미 실행중입니다.");
+		        } catch (IOException e) {
+		            System.out.println("IO Exception in startServer()" + e.getMessage());
+		        }
+			}
+			
+		});
+    	thread.start();
     }
     
     // <<< 서버끄기 기능>>>
     private void stopServer() {
     	//클라이언트 소켓을 닫고 서버 소켓을 닫아서 클라이언트의 연결을 중단
-    	sysoutGUI("서버 종료 로직을 구현해야합니다.\n");
         try {
             if (this.socket != null) {
                 this.socket.close();
@@ -178,9 +210,9 @@ public class ServerMain extends JFrame {
                 this.serverSocket.close();
             }
             sysoutGUI("서버가 종료되었습니다.\n");
+			System.exit(0);
         } catch (IOException e) {
-            System.out.println("서버 종료에 실패: " + e.getMessage());
+            sysoutGUI("서버 종료에 실패: " + e.getMessage());
         }
     }
-	
 }

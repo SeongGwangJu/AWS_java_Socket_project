@@ -25,8 +25,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
-import client.ClientReceiver;
-import client.ClientSender;
 import client.dto.RequestBodyDto;
 import client.dto.SendMessage;
 import lombok.Getter;
@@ -268,6 +266,18 @@ public class ClientMain extends JFrame {
 		chattingRoomPanel.add(sendButton);
 		
 		btnNewButton = new JButton("X");
+		btnNewButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount() == 1) {
+					String roomName = roomListModel.get(roomList.getSelectedIndex());
+					chattingTextArea.setText("");
+					mainCardLayout.show(mainCardPanel, "chattingRoomListPanel");
+					RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("exitRoom", roomName);
+					ClientSender.getInstance().send(requestBodyDto);
+				}
+			}
+		});
 		btnNewButton.setFont(new Font("맑은 고딕", Font.BOLD, 12));
 		btnNewButton.setBounds(247, 8, 40, 35);
 		chattingRoomPanel.add(btnNewButton);
