@@ -24,7 +24,9 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
+import ch26_socket.simpleGUI.client.ClientReceiver;
 import ch26_socket.simpleGUI.client.ClientSender;
+import ch26_socket.simpleGUI.client.SimpleGUIClient;
 import ch26_socket.simpleGUI.client.dto.RequestBodyDto;
 import ch26_socket.simpleGUI.client.dto.SendMessage;
 import lombok.Getter;
@@ -73,8 +75,17 @@ public class ClientMain extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					ClientMain frame = new ClientMain();
+//					ClientMain frame = new ClientMain();
+//					frame.setVisible(true);
+					ClientMain frame = ClientMain.getInstance();
 					frame.setVisible(true);
+					
+					ClientReceiver clientReceiver = new ClientReceiver();
+					clientReceiver.start();
+					
+					RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("connection", frame.username);
+					ClientSender.getInstance().send(requestBodyDto);
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -157,13 +168,13 @@ public class ClientMain extends JFrame {
 		usernameTextField.setFont(new Font("맑은 고딕", Font.BOLD, 15));
 		usernameTextField.setBorder(new EmptyBorder(0, 0, 0, 0));
 		usernameTextField.setEditable(false);
-		usernameTextField.setText("송유나");
+//		usernameTextField.setText("송유나");
 		usernameTextField.setBounds(52, 5, 53, 40);
 		chattingRoomListPanel.add(usernameTextField);
 		usernameTextField.setColumns(10);
 		
 		userIcon = new JLabel("");
-		userIcon.setIcon(new ImageIcon("C:\\Users\\ITPS\\Downloads\\pngwing.com (1) (1) (4).png"));
+		userIcon.setIcon(new ImageIcon("C:\\aws\\java\\workspace\\socket_project\\socket_project_client\\src\\userIcon.png"));
 		userIcon.setBounds(12, 8, 35, 35);
 		chattingRoomListPanel.add(userIcon);
 		
@@ -211,7 +222,7 @@ public class ClientMain extends JFrame {
 		userListScrollPane.setViewportView(userList);
 		
 		roomNameTextField = new JTextField();
-		roomNameTextField.setText("채팅해볼까");
+//		roomNameTextField.setText("채팅해볼까");
 		roomNameTextField.setHorizontalAlignment(SwingConstants.LEFT);
 		roomNameTextField.setFont(new Font("맑은 고딕", Font.BOLD, 15));
 		roomNameTextField.setEditable(false);
@@ -221,11 +232,11 @@ public class ClientMain extends JFrame {
 		chattingRoomPanel.add(roomNameTextField);
 		
 		roomNameIcon = new JLabel("");
-		roomNameIcon.setIcon(new ImageIcon("C:\\Users\\ITPS\\Downloads\\pngwing.com (1) (1) (4).png"));
+		roomNameIcon.setIcon(new ImageIcon("C:\\aws\\java\\workspace\\socket_project\\socket_project_client\\src\\userIcon.png"));
 		roomNameIcon.setBounds(12, 8, 35, 35);
 		chattingRoomPanel.add(roomNameIcon);
 		
-		ipLabel = new JLabel("127.0.0.1");
+		ipLabel = new JLabel();
 		ipLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 13));
 		ipLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		ipLabel.setBounds(180, 6, 57, 35);
