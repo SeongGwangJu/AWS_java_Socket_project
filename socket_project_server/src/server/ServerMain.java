@@ -32,7 +32,7 @@ public class ServerMain extends JFrame {
 	int port = 8000;
 	String portString = Integer.toString(port);
 	
-	//서버 GUI 출력메서드
+	//서버 GUI 출력메서드 
 	public void sysoutGUI (String print) {
 		serverNotiTextArea.append(print + "\n");
 		System.out.println(print);
