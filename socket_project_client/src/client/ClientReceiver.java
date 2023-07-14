@@ -61,6 +61,9 @@ public class ClientReceiver extends Thread {
 				ClientMain.getInstance().getUserListModel().clear();
 				ClientMain.getInstance().getUserListModel().addAll(usernameList);
 				break;
+				
+			case "exit":
+				
 		}
 	}
 	

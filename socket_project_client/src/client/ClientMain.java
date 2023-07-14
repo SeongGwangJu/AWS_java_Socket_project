@@ -1,6 +1,7 @@
 package client;
 
 import java.awt.CardLayout;
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.KeyAdapter;
@@ -65,6 +66,7 @@ public class ClientMain extends JFrame {
 	private JLabel ipLabel;
 	private JButton sendButton;
 	private JButton btnNewButton;
+	private JLabel btnNewJLabel;
 
 	/**
 	 * Launch the application.
@@ -191,7 +193,7 @@ public class ClientMain extends JFrame {
 		usernameTextField.setColumns(10);
 	
 		userIcon = new JLabel("");
-		userIcon.setIcon(new ImageIcon("https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbhNvzW%2FbtsnwokhaPu%2FBW3ozFzI4AWkBOGXYKh4cK%2Fimg.png"));
+		userIcon.setIcon(new ImageIcon("C:\\aws\\java\\workspace\\socket_project\\socket_project_client\\src\\userIcon.png"));
 
 		userIcon.setBounds(12, 8, 35, 35);
 		chattingRoomListPanel.add(userIcon);
