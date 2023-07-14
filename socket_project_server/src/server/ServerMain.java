@@ -6,32 +6,22 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import server.ConnectedSocket;
 import server.entity.Room;
 
 import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import java.awt.Font;
 import javax.swing.JLabel;
-import javax.swing.SwingConstants;
 import javax.swing.JTextArea;
 import java.awt.Color;
-import java.awt.Component;
 
-import javax.swing.JList;
 import java.awt.Toolkit;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.ImageIcon;
-import java.awt.event.ItemListener;
-import java.awt.event.ItemEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
@@ -39,8 +29,8 @@ public class ServerMain extends JFrame {
 
 	//ip / port설정
 	String ip = "127.0.0.1";
-	int portInt = 8000;
-	String portString = Integer.toString(portInt);
+	int port = 8000;
+	String portString = Integer.toString(port);
 	
 	//서버 GUI 출력메서드
 	public void sysoutGUI (String print) {
@@ -101,9 +91,9 @@ public class ServerMain extends JFrame {
 		ServerStartButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(ServerStartButton.isSelected()) {
-					sysoutGUI("");
 					startServer();
-				} else if(!serverSocket.isClosed()) {
+					
+				} else if(!ServerStartButton.isSelected()){
 					stopServer();
 				}
 				
@@ -160,12 +150,12 @@ public class ServerMain extends JFrame {
     	try {
             // 서버 소켓 생성 및 클라이언트 연결 대기
             sysoutGUI("클라이언트 연결을 시도합니다.");
-            ServerSocket serverSocket = new ServerSocket(portInt);
-            this.serverSocket = new ServerSocket(portInt);
+            this.serverSocket = new ServerSocket(port);
             sysoutGUI("서버 시작: "+ portString +"포트에서 클라이언트 연결을 시도합니다.");
            
             while(true) {
-            	Socket socket = serverSocket.accept();
+				sysoutGUI("accept 전");
+            	this.socket = serverSocket.accept();
             	sysoutGUI("accept 성공");
 				ConnectedSocket connectedSocket = new ConnectedSocket(socket);
 				connectedSocket.start();
@@ -181,11 +171,11 @@ public class ServerMain extends JFrame {
     	//클라이언트 소켓을 닫고 서버 소켓을 닫아서 클라이언트의 연결을 중단
     	sysoutGUI("서버 종료 로직을 구현해야합니다.\n");
         try {
-            if (socket != null) {
-                socket.close();
+            if (this.socket != null) {
+                this.socket.close();
             }
-            if (serverSocket != null) {
-                serverSocket.close();
+            if (this.serverSocket != null) {
+                this.serverSocket.close();
             }
             sysoutGUI("서버가 종료되었습니다.\n");
         } catch (IOException e) {
