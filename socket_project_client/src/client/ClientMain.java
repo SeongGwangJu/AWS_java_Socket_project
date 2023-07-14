@@ -1,6 +1,7 @@
 package client;
 
 import java.awt.CardLayout;
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.KeyAdapter;
@@ -67,6 +68,7 @@ public class ClientMain extends JFrame {
 	private JLabel ipLabel;
 	private JButton sendButton;
 	private JButton btnNewButton;
+	private JLabel btnNewJLabel;
 
 	/**
 	 * Launch the application.
@@ -193,7 +195,7 @@ public class ClientMain extends JFrame {
 		usernameTextField.setColumns(10);
 	
 		userIcon = new JLabel("");
-		userIcon.setIcon(new ImageIcon("https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbhNvzW%2FbtsnwokhaPu%2FBW3ozFzI4AWkBOGXYKh4cK%2Fimg.png"));
+		userIcon.setIcon(new ImageIcon("C:\\aws\\java\\workspace\\socket_project\\socket_project_client\\src\\userIcon.png"));
 
 		userIcon.setBounds(12, 8, 35, 35);
 		chattingRoomListPanel.add(userIcon);
@@ -267,11 +269,16 @@ public class ClientMain extends JFrame {
 		sendButton.setBounds(219, 504, 68, 40);
 		chattingRoomPanel.add(sendButton);
 		
-		btnNewButton = new JButton("X");
-		btnNewButton.setFont(new Font("맑은 고딕", Font.BOLD, 12));
-		btnNewButton.setBounds(247, 8, 40, 35);
-		chattingRoomPanel.add(btnNewButton);
-		
+		btnNewJLabel = new JLabel("X");
+		btnNewJLabel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				mainCardLayout.show(mainCardPanel, "chattingRoomListPanel");
+			}
+		});
+		btnNewJLabel.setFont(new Font("맑은 고딕", Font.BOLD, 12));
+		btnNewJLabel.setBounds(247, 8, 45, 35);
+		chattingRoomPanel.add(btnNewJLabel);
 		
 		
 	}

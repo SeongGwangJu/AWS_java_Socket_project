@@ -27,15 +27,9 @@ public class ConnectedSocket extends Thread {
 
 		while (true) {
 			try {
-				String requestBody= "";
-				BufferedReader bufferedReader;
-				try {
-					bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-					requestBody = bufferedReader.readLine();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				
+				BufferedReader bufferedReader = 
+						new BufferedReader(new InputStreamReader(socket.getInputStream()));
+				String requestBody = bufferedReader.readLine();
 				requestController(requestBody);
 				
 			} catch (IOException e) {
