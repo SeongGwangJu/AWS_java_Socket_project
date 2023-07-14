@@ -20,7 +20,7 @@ public class ConnectedSocket extends Thread {
 	private Gson gson;
 	private final Socket socket;
 	private String username;
-
+	
 	@Override
 	public void run() {
 		gson = new Gson();
@@ -73,7 +73,6 @@ public class ConnectedSocket extends Thread {
 	
 	private void connection(String requestBody) {
 		username = (String) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
-		
 		List<String> roomNameList = new ArrayList<>();
 
 		server.ServerMain.roomList.forEach(room -> {
@@ -118,10 +117,10 @@ public class ConnectedSocket extends Thread {
 	
 	private void join(String requestBody) {
 		String roomName = (String) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
-		
+
 		//순서바꿔봄
-		System.out.println("받아온 리소스 join을 처리한다. body로 부터 username을 받아왔다.");
-		username = (String) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
+		System.out.println("받아온 리소스 join을 처리한다.");
+
 
 		System.out.println("연결된 소켓리스트에 저장된 데이터를  usernameList에 저장하고 값을 옮긴다.");
 		server.ServerMain.connectedSocketList.forEach(connectedSocket -> {

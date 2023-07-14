@@ -7,6 +7,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.net.Socket;
 import java.util.Objects;
 
@@ -24,9 +25,10 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
-import ch26_socket.simpleGUI.client.ClientSender;
-import ch26_socket.simpleGUI.client.dto.RequestBodyDto;
-import ch26_socket.simpleGUI.client.dto.SendMessage;
+import client.ClientReceiver;
+import client.ClientSender;
+import client.dto.RequestBodyDto;
+import client.dto.SendMessage;
 import lombok.Getter;
 
 @Getter
@@ -73,8 +75,17 @@ public class ClientMain extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					ClientMain frame = new ClientMain();
+//					ClientMain frame = new ClientMain();
+//					frame.setVisible(true);
+					ClientMain frame = ClientMain.getInstance();
 					frame.setVisible(true);
+					
+					ClientReceiver clientReceiver = new ClientReceiver();
+					clientReceiver.start();
+					
+					RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("connection", frame.username);
+					ClientSender.getInstance().send(requestBodyDto);
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -85,7 +96,25 @@ public class ClientMain extends JFrame {
 	/**
 	 * Create the frame.
 	 */
+	
 	public ClientMain() {
+		
+		username = JOptionPane.showInputDialog(chattingRoomPanel, "아이디를 입력하세요.");			
+		
+		if(Objects.isNull(username)) {
+			System.exit(0);
+		}
+		
+		if(username.isBlank()) {
+			System.exit(0);
+		}
+		
+		try {
+			socket = new Socket("127.0.0.1", 8000);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 320, 600);
@@ -157,13 +186,13 @@ public class ClientMain extends JFrame {
 		usernameTextField.setFont(new Font("맑은 고딕", Font.BOLD, 15));
 		usernameTextField.setBorder(new EmptyBorder(0, 0, 0, 0));
 		usernameTextField.setEditable(false);
-		usernameTextField.setText("송유나");
+		usernameTextField.setText(username);
 		usernameTextField.setBounds(52, 5, 53, 40);
 		chattingRoomListPanel.add(usernameTextField);
 		usernameTextField.setColumns(10);
 		
 		userIcon = new JLabel("");
-		userIcon.setIcon(new ImageIcon("C:\\Users\\ITPS\\Downloads\\pngwing.com (1) (1) (4).png"));
+		userIcon.setIcon(new ImageIcon("https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbhNvzW%2FbtsnwokhaPu%2FBW3ozFzI4AWkBOGXYKh4cK%2Fimg.png"));
 		userIcon.setBounds(12, 8, 35, 35);
 		chattingRoomListPanel.add(userIcon);
 		
@@ -211,7 +240,7 @@ public class ClientMain extends JFrame {
 		userListScrollPane.setViewportView(userList);
 		
 		roomNameTextField = new JTextField();
-		roomNameTextField.setText("채팅해볼까");
+		roomNameTextField.setText("임시용"); //
 		roomNameTextField.setHorizontalAlignment(SwingConstants.LEFT);
 		roomNameTextField.setFont(new Font("맑은 고딕", Font.BOLD, 15));
 		roomNameTextField.setEditable(false);
@@ -221,11 +250,11 @@ public class ClientMain extends JFrame {
 		chattingRoomPanel.add(roomNameTextField);
 		
 		roomNameIcon = new JLabel("");
-		roomNameIcon.setIcon(new ImageIcon("C:\\Users\\ITPS\\Downloads\\pngwing.com (1) (1) (4).png"));
+		roomNameIcon.setIcon(new ImageIcon("C:\\aws\\java\\workspace\\socket_project\\socket_project_client\\src\\userIcon.png"));
 		roomNameIcon.setBounds(12, 8, 35, 35);
 		chattingRoomPanel.add(roomNameIcon);
 		
-		ipLabel = new JLabel("127.0.0.1");
+		ipLabel = new JLabel();
 		ipLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 13));
 		ipLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		ipLabel.setBounds(180, 6, 57, 35);

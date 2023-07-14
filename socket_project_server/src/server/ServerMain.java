@@ -141,7 +141,7 @@ public class ServerMain extends JFrame {
 		userNumArea.setBackground(Color.DARK_GRAY);
 		userNumArea.setBounds(208, 56, 56, 15);
 		mainPanel.add(userNumArea);
-		userNumArea.setText("추가해야함"); //접속자수 표시
+		userNumArea.setText("구현해야함"); //접속자수 표시
 		
 	}
 	
