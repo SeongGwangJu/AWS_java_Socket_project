@@ -76,7 +76,7 @@ public class ConnectedSocket extends Thread {
 		
 		List<String> roomNameList = new ArrayList<>();
 
-		ServerMain.roomList.forEach(room -> {
+		server.ServerMain.roomList.forEach(room -> {
 			roomNameList.add(room.getRoomName());
 		});
 
@@ -97,18 +97,18 @@ public class ConnectedSocket extends Thread {
 				.userList(new ArrayList<ConnectedSocket>())
 				.build();
 
-		ServerMain.roomList.add(newRoom);
+		server.ServerMain.roomList.add(newRoom);
 
 		List<String> roomNameList = new ArrayList<>();
 
-		ServerMain.roomList.forEach(room -> {
+		server.ServerMain.roomList.forEach(room -> {
 			roomNameList.add(room.getRoomName());
 		});
 
 		RequestBodyDto<List<String>> updateRoomListRequestBodyDto = new RequestBodyDto<List<String>>(
 				"updateRoomList", roomNameList);
 
-		ServerMain.connectedSocketList.forEach(con -> {
+		server.ServerMain.connectedSocketList.forEach(con -> {
 
 			ServerSender.getInstance().send(con.socket, updateRoomListRequestBodyDto);
 		});
@@ -124,12 +124,12 @@ public class ConnectedSocket extends Thread {
 		username = (String) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
 
 		System.out.println("연결된 소켓리스트에 저장된 데이터를  usernameList에 저장하고 값을 옮긴다.");
-		ServerMain.connectedSocketList.forEach(connectedSocket -> {
+		server.ServerMain.connectedSocketList.forEach(connectedSocket -> {
 			
 			
 		});
-		
-		ServerMain.roomList.forEach(room -> {
+
+		server.ServerMain.roomList.forEach(room -> {
 			if(room.getRoomName().equals(roomName)) {
 				room.getUserList().add(this);
 				
@@ -173,7 +173,7 @@ public class ConnectedSocket extends Thread {
 		RequestBodyDto<SendMessage> requestBodyDto = gson.fromJson(requestBody, typeToken.getType());
 		SendMessage sendMessage = requestBodyDto.getBody();
 
-		ServerMain.roomList.forEach(room -> {
+		server.ServerMain.roomList.forEach(room -> {
 			if(room.getUserList().contains(this)) {
 				// 반복으로 모든 접속자에게 전송
 				room.getUserList().forEach(connectedSocket -> {
