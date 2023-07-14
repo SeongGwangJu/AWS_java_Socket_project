@@ -187,12 +187,14 @@ public class ClientMain extends JFrame {
 		usernameTextField.setBorder(new EmptyBorder(0, 0, 0, 0));
 		usernameTextField.setEditable(false);
 		usernameTextField.setText(username);
+
 		usernameTextField.setBounds(52, 5, 53, 40);
 		chattingRoomListPanel.add(usernameTextField);
 		usernameTextField.setColumns(10);
-		
+	
 		userIcon = new JLabel("");
 		userIcon.setIcon(new ImageIcon("https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbhNvzW%2FbtsnwokhaPu%2FBW3ozFzI4AWkBOGXYKh4cK%2Fimg.png"));
+
 		userIcon.setBounds(12, 8, 35, 35);
 		chattingRoomListPanel.add(userIcon);
 		

@@ -13,7 +13,6 @@ public class ClientReceiver extends Thread {
 	@Override
 	public void run() {
 		ClientMain clientMain = ClientMain.getInstance();
-		
 		while(true) {
 			try {
 				BufferedReader bufferedReader = 
@@ -24,10 +23,6 @@ public class ClientReceiver extends Thread {
 				
 			} catch (IOException e) {
 				e.printStackTrace();
-				System.out.println("여기다");
-			} catch (NullPointerException e) {
-				e.printStackTrace();
-				System.out.println("여기다2");
 			}
 		}
 	}
