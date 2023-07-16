@@ -21,6 +21,7 @@ public class ConnectedSocket extends Thread {
 	private Gson gson;
 	private final Socket socket;
 	private String username;
+	private boolean isOwner = false;  // 송유나 방장 변수추가
 	@Override
 	public void run() {
 
@@ -142,12 +143,20 @@ public class ConnectedSocket extends Thread {
 				"updateRoomList", roomNameList);
 
 		server.ServerMain.connectedSocketList.forEach(con -> {
-
+            
 			ServerSender.getInstance().send(con.socket, updateRoomListRequestBodyDto);
+			
+			// 송유나 방장 유무 검사
+			if (con.username.equals(username)) {
+	            con.isOwner = true;
+	        } else {
+	            con.isOwner = false;
+	        }
 		});
 
 		
 	}
+    
 	//방에 들어왔을 때 유저리스트와 join메시지를 반환
 	private void join(String requestBody) {
 		String roomName = (String) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
@@ -170,7 +179,8 @@ public class ConnectedSocket extends Thread {
 				
 				
 				room.getUserList().forEach(con -> {
-					usernameList.add(con.username);
+//					usernameList.add(con.username);
+					 usernameList.add(con.username + (con.isOwner ? " (방장)" : "")); // 송유나(방장뜨는 코드)
 				});
 				room.getUserList().forEach(connectedSocket -> {
 					

@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.List;
 import java.util.Objects;
 
 import javax.swing.DefaultListModel;
@@ -40,6 +41,8 @@ public class ClientMain extends JFrame {
 		}
 		return instance;
 	}
+	
+	private JLabel roomOwnerLabel;
 	
 	private String username;
 	private Socket socket;
@@ -152,15 +155,17 @@ public class ClientMain extends JFrame {
 						return;
 					}
 				}
-		        
+				
 				RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("createRoom", roomName);
 				ClientSender.getInstance().send(requestBodyDto);
-				mainCardLayout.show(mainCardPanel, "chattingRoomPanel"); 
+				mainCardLayout.show(mainCardPanel, "chattingRoomPanel");
 				requestBodyDto = new RequestBodyDto<String>("join", roomName);
 				ClientSender.getInstance().send(requestBodyDto);
+				
 			}
 		});
 		chattingRoomListPanel.add(createRoomButton);
+		
 		
 		roomListScrollPanel = new JScrollPane();
 		roomListScrollPanel.setBounds(17, 150, 270, 340);
@@ -267,11 +272,17 @@ public class ClientMain extends JFrame {
 		sendButton.setBounds(219, 504, 68, 40);
 		chattingRoomPanel.add(sendButton);
 		
+		 
 		btnNewButton = new JButton("X");
 		btnNewButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if(e.getClickCount() == 1) {
+					if(JOptionPane.showConfirmDialog(null, "정말로 방을 나가시겠습니까?", "방 나가기", JOptionPane.YES_NO_OPTION) == 0) {
+						RequestBodyDto<String> requestDto = new RequestBodyDto<String>("exitRoom", null);
+						ClientSender.getInstance().send(requestDto);
+	                }
+					
 					String roomName = roomListModel.get(roomList.getSelectedIndex());
 					chattingTextArea.setText("");
 					mainCardLayout.show(mainCardPanel, "chattingRoomListPanel");
@@ -281,8 +292,15 @@ public class ClientMain extends JFrame {
 			}
 		});
 		btnNewButton.setFont(new Font("맑은 고딕", Font.BOLD, 12));
-		btnNewButton.setBounds(247, 8, 40, 35);
+		btnNewButton.setBounds(247, 8, 45, 35);
 		chattingRoomPanel.add(btnNewButton);
+		
+		
+		roomOwnerLabel = new JLabel();
+        roomOwnerLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 13));
+        roomOwnerLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        roomOwnerLabel.setBounds(180, 6, 57, 35);
+        chattingRoomPanel.add(roomOwnerLabel);
 		
 		
 		

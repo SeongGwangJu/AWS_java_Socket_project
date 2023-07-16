@@ -5,8 +5,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.SocketException;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import client.dto.RequestBodyDto;
 
 public class ClientReceiver extends Thread {
@@ -49,7 +52,7 @@ public class ClientReceiver extends Thread {
 				List<String> roomList = (List<String>) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
 				ClientMain.getInstance().getRoomListModel().clear();
 				ClientMain.getInstance().getRoomListModel().addAll(roomList);
-				break;
+			    break;
 				
 			case "showMessage":
 				String messageContent = (String) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
@@ -62,7 +65,14 @@ public class ClientReceiver extends Thread {
 				ClientMain.getInstance().getUserListModel().addAll(usernameList);
 				break;
 				
-			case "exit":
+			case "exitRoom":
+				List<String> exitRoom = (List<String>) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
+				
+				ClientMain.getInstance().getChattingTextArea().setText("");
+				ClientMain.getInstance().getMainCardPanel().show();
+                break;
+            default:
+                break;
 				
 		}
 	}
