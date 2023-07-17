@@ -4,8 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.SocketException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import javax.swing.JOptionPane;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -66,16 +69,17 @@ public class ClientReceiver extends Thread {
 				break;
 				
 			case "exitRoom":
-				List<String> exitRoom = (List<String>) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
+				String roomName = (String) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
+				ClientMain.getInstance().getRoomListModel().clear();
+			    break;
+			    
+			case "ownerExitRoom":
 				
-				ClientMain.getInstance().getChattingTextArea().setText("");
-				ClientMain.getInstance().getMainCardPanel().show();
-                break;
-            default:
-                break;
-				
+			    break;
 		}
 	}
+	
+	
 	
 
 }
