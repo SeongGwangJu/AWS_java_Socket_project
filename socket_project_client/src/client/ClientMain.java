@@ -46,6 +46,7 @@ public class ClientMain extends JFrame {
 	
 	private String username;
 	private Socket socket;
+	private boolean isOwner = true;
 	
 	private CardLayout mainCardLayout;
 	private JPanel mainCardPanel;
@@ -272,22 +273,31 @@ public class ClientMain extends JFrame {
 		sendButton.setBounds(219, 504, 68, 40);
 		chattingRoomPanel.add(sendButton);
 		
-		 
+		
 		btnNewButton = new JButton("X");
 		btnNewButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if(e.getClickCount() == 1) {
 					if(JOptionPane.showConfirmDialog(null, "정말로 방을 나가시겠습니까?", "방 나가기", JOptionPane.YES_NO_OPTION) == 0) {
-						RequestBodyDto<String> requestDto = new RequestBodyDto<String>("exitRoom", null);
-						ClientSender.getInstance().send(requestDto);
-	                }
-					
-					String roomName = roomListModel.get(roomList.getSelectedIndex());
-					chattingTextArea.setText("");
-					mainCardLayout.show(mainCardPanel, "chattingRoomListPanel");
-					RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("exitRoom", roomName);
-					ClientSender.getInstance().send(requestBodyDto);
+						
+						if(equals(username)) {
+							JOptionPane.showMessageDialog(null, "방장이 나갔습니다.", "방나가짐", JOptionPane.ERROR_MESSAGE);
+							chattingTextArea.setText("");
+							mainCardLayout.show(mainCardPanel, "chattingRoomListPanel");
+							String roomName = roomListModel.get(roomList.getSelectedIndex());
+							RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("ownerExitRoom", roomName);
+                            ClientSender.getInstance().send(requestBodyDto);
+                            
+						} else {
+							chattingTextArea.setText("");
+							mainCardLayout.show(mainCardPanel, "chattingRoomListPanel");
+							String roomName = roomListModel.get(roomList.getSelectedIndex());
+							RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("exitRoom", roomName);
+							ClientSender.getInstance().send(requestBodyDto);
+						}
+						
+					}
 				}
 			}
 		});

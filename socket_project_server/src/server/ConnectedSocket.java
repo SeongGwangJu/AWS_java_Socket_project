@@ -21,7 +21,7 @@ public class ConnectedSocket extends Thread {
 	private Gson gson;
 	private final Socket socket;
 	private String username;
-	private boolean isOwner = false;  // 송유나 방장 변수추가
+	private boolean isOwner = true;  // 송유나 방장 변수추가
 	@Override
 	public void run() {
 
@@ -212,11 +212,12 @@ public class ConnectedSocket extends Thread {
 	private void exitRoom(String requestBody) { 
 		String roomName = (String) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
 		
+	    
+		
 		//순서바꿔 봄
 		ServerMain.getInstance().sysoutGUI("exitRoom 정보 반환");
 	
 		ServerMain.connectedSocketList.forEach(connectedSocket -> {
-			
 			
 		});
 
@@ -228,7 +229,7 @@ public class ConnectedSocket extends Thread {
 				
 				
 				room.getUserList().forEach(con -> {
-					usernameList.add(con.username);
+					usernameList.add(con.username+ (con.isOwner ? " (방장)" : ""));
 				});
 				room.getUserList().forEach(connectedSocket -> {
 					
