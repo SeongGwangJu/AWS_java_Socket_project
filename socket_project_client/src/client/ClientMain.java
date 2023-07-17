@@ -47,6 +47,7 @@ public class ClientMain extends JFrame {
 	private String username;
 	private Socket socket;
 	private boolean isOwner = true;
+	private boolean isRoomCreator = false;
 	
 	private CardLayout mainCardLayout;
 	private JPanel mainCardPanel;
@@ -149,6 +150,9 @@ public class ClientMain extends JFrame {
 					JOptionPane.showMessageDialog(chattingRoomListPanel, "방제목을 입력하세요.", "방만들기 실패", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
+				
+				// 방을 만들 때 방장이 된다고 가정합니다.
+		        isRoomCreator = true;
 				
 				for(int i = 0; i < roomListModel.size(); i++) {
 					if(roomListModel.get(i).equals(roomName)) {
@@ -281,7 +285,7 @@ public class ClientMain extends JFrame {
 				if(e.getClickCount() == 1) {
 					if(JOptionPane.showConfirmDialog(null, "정말로 방을 나가시겠습니까?", "방 나가기", JOptionPane.YES_NO_OPTION) == 0) {
 						
-						if(equals(username)) {
+						if(isRoomCreator) {
 							JOptionPane.showMessageDialog(null, "방장이 나갔습니다.", "방나가짐", JOptionPane.ERROR_MESSAGE);
 							chattingTextArea.setText("");
 							mainCardLayout.show(mainCardPanel, "chattingRoomListPanel");
@@ -314,6 +318,9 @@ public class ClientMain extends JFrame {
 		
 		
 		
+	}
+
+	public void setRoomCreator(boolean b) {
 	}
 
 }
