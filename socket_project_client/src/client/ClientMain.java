@@ -70,23 +70,26 @@ public class ClientMain extends JFrame {
 	private JButton sendButton;
 	private JButton btnNewButton;
 	private JLabel btnNewJLabel;
+	String ip = "127.0.0.1";
+	int port = 8000;
 
-	/**
-	 * Launch the application.
-	 */
+	// <<< 메인메서드 : GUI 표시 >>>
 	public static void main(String[] args) {
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-//					ClientMain frame = new ClientMain();
-//					frame.setVisible(true);
+/*					ClientMain frame = new ClientMain();
+					frame.setVisible(true); */
 					ClientMain frame = ClientMain.getInstance();
 					frame.setVisible(true);
 					
 					ClientReceiver clientReceiver = new ClientReceiver();
 					clientReceiver.start();
 					
-					RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("connection", frame.username);
+					// 연결시 : "connection" 전송(username)
+					RequestBodyDto<String> requestBodyDto 
+					= new RequestBodyDto<String>("connection", frame.username);
 					ClientSender.getInstance().send(requestBodyDto);
 					
 				} catch (Exception e) {
@@ -96,25 +99,21 @@ public class ClientMain extends JFrame {
 		});
 	}
 
-	/**
-	 * Create the frame.
-	 */
 	
 	public ClientMain() {
+		setAlwaysOnTop(true);
 		
-		username = JOptionPane.showInputDialog(chattingRoomPanel, "아이디를 입력하세요.");			
-		
+		// <<< 아이디 입력창 및 연결부 >>>
+		username = JOptionPane.showInputDialog(null, "아이디를 입력하세요.");			
 		if(Objects.isNull(username)) {
 			System.exit(0);
 		}
-		
 		if(username.isBlank()) {
 			System.exit(0);
 		}
-		
+		//소켓 접속
 		try {
-			socket = new Socket("127.0.0.1", 8000);
-			
+			socket = new Socket(ip, port);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -127,17 +126,21 @@ public class ClientMain extends JFrame {
 		mainCardPanel.setLayout(mainCardLayout);
 		setContentPane(mainCardPanel);
 		
+		
+		// <<< 대기실 >>>
 		chattingRoomListPanel = new JPanel();
 		chattingRoomListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		chattingRoomListPanel.setLayout(null);
 		mainCardPanel.add(chattingRoomListPanel, "chattingRoomListPanel");
 		
 		
-		
+		// 방만들기 버튼
 		JButton createRoomButton = new JButton("방만들기");
 		createRoomButton.setFont(new Font("맑은 고딕", Font.BOLD, 14));
 		createRoomButton.setBounds(66, 82, 170, 40);
+		
 		createRoomButton.addMouseListener(new MouseAdapter() {
+			
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				String roomName = JOptionPane.showInputDialog(chattingRoomListPanel, "방제목을 입력하세요.");
@@ -155,22 +158,30 @@ public class ClientMain extends JFrame {
 						return;
 					}
 				}
-				
+				//방만들면 "createRoom"(roomName), "join"(roomName) 전송
 				RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("createRoom", roomName);
 				ClientSender.getInstance().send(requestBodyDto);
+				
+				//방제목 표시(방장용)
+                EventQueue.invokeLater(new Runnable() {
+                    public void run() {
+                    	roomNameTextField.setText(roomName);
+                    }
+                });
+                
 				mainCardLayout.show(mainCardPanel, "chattingRoomPanel");
+				
 				requestBodyDto = new RequestBodyDto<String>("join", roomName);
 				ClientSender.getInstance().send(requestBodyDto);
-				
 			}
 		});
+		
 		chattingRoomListPanel.add(createRoomButton);
-		
-		
 		roomListScrollPanel = new JScrollPane();
 		roomListScrollPanel.setBounds(17, 150, 270, 340);
 		chattingRoomListPanel.add(roomListScrollPanel);
 		
+		// 방 입장시 "join" (roomName)
 		roomListModel = new DefaultListModel<String>();
 		roomList = new JList(roomListModel);
 		roomList.addMouseListener(new MouseAdapter() {
@@ -181,11 +192,20 @@ public class ClientMain extends JFrame {
 					mainCardLayout.show(mainCardPanel, "chattingRoomPanel");
 					RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("join", roomName);
 					ClientSender.getInstance().send(requestBodyDto);
+					
+					//방제목 표시(join유저)
+                    EventQueue.invokeLater(new Runnable() {
+                        public void run() {
+                        	roomNameTextField.setText(roomListModel.get(roomList.getSelectedIndex()));
+                        }
+                    });
+					
 				}
 			}
 		});
 		roomListScrollPanel.setViewportView(roomList);
-        
+		
+        // 대기실 유저 이름표시 
 		usernameTextField = new JTextField();
 		usernameTextField.setHorizontalAlignment(SwingConstants.LEFT);
 		usernameTextField.setFont(new Font("맑은 고딕", Font.BOLD, 15));
@@ -197,12 +217,15 @@ public class ClientMain extends JFrame {
 		chattingRoomListPanel.add(usernameTextField);
 		usernameTextField.setColumns(10);
 	
+		// 유저 아이콘
 		userIcon = new JLabel("");
 		userIcon.setIcon(new ImageIcon("C:\\aws\\java\\workspace\\socket_project\\socket_project_client\\src\\userIcon.png"));
 
 		userIcon.setBounds(12, 8, 35, 35);
 		chattingRoomListPanel.add(userIcon);
 		
+		
+		// <<< 채팅방 >>>
 		chattingRoomPanel = new JPanel();
 		chattingRoomPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		chattingRoomPanel.setLayout(null);
@@ -212,9 +235,11 @@ public class ClientMain extends JFrame {
 		chattingTextAreaScrollPanel.setBounds(17, 150, 270, 340);
 		chattingRoomPanel.add(chattingTextAreaScrollPanel);
 		
+		// 채팅창
 		chattingTextArea = new JTextArea();
 		chattingTextAreaScrollPanel.setViewportView(chattingTextArea);
 		
+		// 채팅 입력시 : sendMessage(발신자,메시지 내용)
 		messageTextField = new JTextField();
 		messageTextField.addKeyListener(new KeyAdapter() {
 			@Override
@@ -238,6 +263,7 @@ public class ClientMain extends JFrame {
 		chattingRoomPanel.add(messageTextField);
 		messageTextField.setColumns(10);
 		
+		//채팅방 상단 접속자리스트
 		userListScrollPane = new JScrollPane();
 		userListScrollPane.setBounds(17, 55, 270, 80);
 		chattingRoomPanel.add(userListScrollPane);
@@ -246,8 +272,9 @@ public class ClientMain extends JFrame {
 		userList = new JList(userListModel);
 		userListScrollPane.setViewportView(userList);
 		
+		//채팅방 상단 방제표시
 		roomNameTextField = new JTextField();
-		roomNameTextField.setText("임시용"); //
+		roomNameTextField.setText("방제목"); //구현 필요
 		roomNameTextField.setHorizontalAlignment(SwingConstants.LEFT);
 		roomNameTextField.setFont(new Font("맑은 고딕", Font.BOLD, 15));
 		roomNameTextField.setEditable(false);
@@ -256,6 +283,7 @@ public class ClientMain extends JFrame {
 		roomNameTextField.setBounds(52, 5, 130, 40);
 		chattingRoomPanel.add(roomNameTextField);
 		
+		//아이콘
 		roomNameIcon = new JLabel("");
 		roomNameIcon.setIcon(new ImageIcon("C:\\aws\\java\\workspace\\socket_project\\socket_project_client\\src\\userIcon.png"));
 		roomNameIcon.setBounds(12, 8, 35, 35);
@@ -266,28 +294,33 @@ public class ClientMain extends JFrame {
 		ipLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		ipLabel.setBounds(180, 6, 57, 35);
 		chattingRoomPanel.add(ipLabel);
+		ipLabel.setText(ip);
 		
 		sendButton = new JButton("전송");
 		sendButton.setFont(new Font("맑은 고딕", Font.BOLD, 11));
 		sendButton.setBounds(219, 504, 68, 40);
 		chattingRoomPanel.add(sendButton);
 		
-		 
+		//방 나가기 버튼 : exitRoom(
 		btnNewButton = new JButton("X");
 		btnNewButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if(e.getClickCount() == 1) {
-					if(JOptionPane.showConfirmDialog(null, "정말로 방을 나가시겠습니까?", "방 나가기", JOptionPane.YES_NO_OPTION) == 0) {
-						RequestBodyDto<String> requestDto = new RequestBodyDto<String>("exitRoom", null);
-						ClientSender.getInstance().send(requestDto);
+					if(JOptionPane.showConfirmDialog(chattingRoomPanel, "정말로 방을 나가시겠습니까?", "방 나가기",
+						JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE) == 0) {
+						String roomName;
+						try {
+							roomName = roomListModel.get(roomList.getSelectedIndex());
+							RequestBodyDto<String> requestDto = new RequestBodyDto<String>("exitRoom", roomName);
+							ClientSender.getInstance().send(requestDto);
+						} catch (ArrayIndexOutOfBoundsException e1) {
+							System.out.println("인덱스ㅋ");
+						}
+
+						chattingTextArea.setText("");
+						mainCardLayout.show(mainCardPanel, "chattingRoomListPanel");
 	                }
-					
-					String roomName = roomListModel.get(roomList.getSelectedIndex());
-					chattingTextArea.setText("");
-					mainCardLayout.show(mainCardPanel, "chattingRoomListPanel");
-					RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("exitRoom", roomName);
-					ClientSender.getInstance().send(requestBodyDto);
 				}
 			}
 		});
