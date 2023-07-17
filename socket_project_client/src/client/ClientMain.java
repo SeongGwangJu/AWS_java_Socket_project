@@ -315,6 +315,7 @@ public class ClientMain extends JFrame {
 							RequestBodyDto<String> requestDto = new RequestBodyDto<String>("exitRoom", roomName);
 							ClientSender.getInstance().send(requestDto);
 						} catch (ArrayIndexOutOfBoundsException e1) {
+							e1.printStackTrace();
 							System.out.println("인덱스ㅋ");
 						}
 

@@ -36,19 +36,23 @@ public class ConnectedSocket extends Thread {
 				
 				try {
 					requestBody = bufferedReader.readLine();
-					requestController(requestBody);
+					
 				}catch (SocketException e) {
-					//serverMain.dispose();
-					//System.exit(0);
+					e.printStackTrace();
+					System.out.println("클라이언트가 나갔음");
+					serverMain.dispose();
+					System.exit(0);
 				} catch (NullPointerException e) {
 					e.printStackTrace();
 					serverMain.getInstance().sysoutGUI("널포인터 익셉션 at readLine");
 				} catch (Exception e) {
 					e.printStackTrace();
 				} 
+				requestController(requestBody);
+				
 			} catch (IOException e) {
 				e.printStackTrace();
-			} catch (java.lang.NullPointerException e) {
+			} catch (NullPointerException e) {
 				e.printStackTrace();
 				System.out.println("널포인터익셉션 at BufferedReader");
 				
@@ -134,7 +138,7 @@ public class ConnectedSocket extends Thread {
 				.userList(new ArrayList<ConnectedSocket>())
 				.build();
 
-		
+		server.ServerMain.roomList.add(newRoom);
 
 		List<String> roomNameList = new ArrayList<>();
 
@@ -206,9 +210,11 @@ public class ConnectedSocket extends Thread {
 	//방 나갈 때 유저리스트와 exitRoom 메시지 반환
 	private void exitRoom(String requestBody) { 
 		String roomName = (String) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
+
 		ServerMain.getInstance().sysoutGUI("exitRoom 정보 반환");
 	
 		ServerMain.connectedSocketList.forEach(connectedSocket -> {
+
 		});
 
 		server.ServerMain.roomList.forEach(room -> {
@@ -219,6 +225,7 @@ public class ConnectedSocket extends Thread {
 					
 				room.getUserList().forEach(con -> {
 					usernameList.add(con.username + (con.isOwner ? " (방장)" : ""));
+
 				});
 				room.getUserList().forEach(connectedSocket -> {
 					
