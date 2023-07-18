@@ -28,29 +28,29 @@ public class ConnectedSocket extends Thread {
 		ServerMain serverMain = ServerMain.getInstance();
 		gson = new Gson();
 
+		//예외처리, 나중에 수정 필요
 		while (true) {
 			try {
 				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				String requestBody = null;
+				
 				try {
 					requestBody = bufferedReader.readLine();
-					
-				}
-				 catch (SocketException e) {
-					 e.printStackTrace();
-					 System.out.println("클라이언트가 나갔음"); // 수정필요
-					serverMain.dispose();
-					System.exit(0);
+					requestController(requestBody);
+				}catch (SocketException e) {
+					//System.out.println("클라이언트가 나갔음");
+					//ServerMain.getInstance().user
+				} catch (NullPointerException e) {
+					serverMain.getInstance().sysoutGUI("널포인터 익셉션 at readLine");
 				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				requestController(requestBody);
+					System.out.println("커넥티드소켓 45");
+				} 
 				
 			} catch (IOException e) {
 				e.printStackTrace();
-			} catch (java.lang.NullPointerException e) {
+			} catch (NullPointerException e) {
 				e.printStackTrace();
-				System.out.println("널포인터익셉션");
+				System.out.println("널포인터익셉션 at BufferedReader");
 				
 			}
 		}
@@ -85,6 +85,10 @@ public class ConnectedSocket extends Thread {
 			exitRoom(requestBody);
 			break;
 			
+		case "ownerExitRoom" :
+			ownerExitRoom(requestBody);
+			break;
+			
 		case "sendWhisper":
 			sendMessage(requestBody);
 			break;
@@ -103,16 +107,13 @@ public class ConnectedSocket extends Thread {
 	private void connection(String requestBody) {
 		username = (String) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
 		
-		
+		//방 제목만 있는 리스트 생성
 		List<String> roomNameList = new ArrayList<>();
-
 		server.ServerMain.roomList.forEach(room -> {
 			roomNameList.add(room.getRoomName());
 		});
-
 		RequestBodyDto<List<String>> updateRoomListRequestBodyDto =
 				new RequestBodyDto<List<String>>("updateRoomList", roomNameList);
-
 		ServerSender.getInstance().send(socket, updateRoomListRequestBodyDto);
 		
 	}
@@ -124,34 +125,29 @@ public class ConnectedSocket extends Thread {
 	private void createRoom(String requestBody) {
 		String roomName = (String) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
 
-		
+		//룸리스트에 추가
 		Room newRoom = Room.builder()
 				.roomName(roomName)
 				.owner(username)
 				.userList(new ArrayList<ConnectedSocket>())
 				.build();
-
 		server.ServerMain.roomList.add(newRoom);
-
+		
 		List<String> roomNameList = new ArrayList<>();
 
 		server.ServerMain.roomList.forEach(room -> {
 			roomNameList.add(room.getRoomName());
 		});
-
 		RequestBodyDto<List<String>> updateRoomListRequestBodyDto = new RequestBodyDto<List<String>>(
 				"updateRoomList", roomNameList);
-
 		server.ServerMain.connectedSocketList.forEach(con -> {
-            
 			ServerSender.getInstance().send(con.socket, updateRoomListRequestBodyDto);
 			
-			// 송유나 방장 유무 검사
-			if (con.username.equals(username)) {
-	            con.isOwner = true;
-	        } else {
-	            con.isOwner = false;
-	        }
+
+		// 송유나 방장 유무 검사 
+		if (con.username.equals(username)) {
+			con.isOwner = true;
+		} else { con.isOwner = false; }
 		});
 
 		
@@ -160,15 +156,11 @@ public class ConnectedSocket extends Thread {
 	//방에 들어왔을 때 유저리스트와 join메시지를 반환
 	private void join(String requestBody) {
 		String roomName = (String) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
-
-		//순서바꿔봄
 		ServerMain.getInstance().sysoutGUI("join 정보 반환");
-
-
+		
+		clearChat();
 		System.out.println("연결된 소켓리스트에 저장된 데이터를  usernameList에 저장하고 값을 옮긴다.");
 		ServerMain.connectedSocketList.forEach(connectedSocket -> {
-			
-			
 		});
 
 		ServerMain.roomList.forEach(room -> {
@@ -180,11 +172,10 @@ public class ConnectedSocket extends Thread {
 				
 				room.getUserList().forEach(con -> {
 //					usernameList.add(con.username);
-					 usernameList.add(con.username + (con.isOwner ? " (방장)" : "")); // 송유나(방장뜨는 코드)
+					usernameList.add(con.username + (con.isOwner ? " (방장)" : "")); // 송유나(방장뜨는 코드)
 				});
+				//System.out.println("유저리스트 업데이트 및 접속알림 데이터 생성");
 				room.getUserList().forEach(connectedSocket -> {
-					
-					//System.out.println("유저리스트 업데이트 및 접속알림 데이터 생성");
 					RequestBodyDto<List<String>> updateUserListDto
 							= new RequestBodyDto<List<String>>("updateUserList", usernameList);
 	
@@ -208,17 +199,16 @@ public class ConnectedSocket extends Thread {
 
 	}
 
-	//방 나갈 때 유저리스트와 exitRoom 메시지 반환
+	//(방장 아닌 사람이) 방 나갈 때 유저리스트와 exitRoom 메시지 반환
 	private void exitRoom(String requestBody) { 
 		String roomName = (String) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
 		
-	    
+		clearChat();
 		
-		//순서바꿔 봄
 		ServerMain.getInstance().sysoutGUI("exitRoom 정보 반환");
 	
 		ServerMain.connectedSocketList.forEach(connectedSocket -> {
-			
+
 		});
 
 		server.ServerMain.roomList.forEach(room -> {
@@ -226,10 +216,10 @@ public class ConnectedSocket extends Thread {
 				room.getUserList().remove(this);
 				
 				List<String> usernameList = new ArrayList<>();
-				
-				
+					
 				room.getUserList().forEach(con -> {
-					usernameList.add(con.username+ (con.isOwner ? " (방장)" : ""));
+					usernameList.add(con.username + (con.isOwner ? " (방장)" : ""));
+
 				});
 				room.getUserList().forEach(connectedSocket -> {
 					
@@ -257,6 +247,55 @@ public class ConnectedSocket extends Thread {
 
 	}
 	
+	//방장이 나가는 경우
+	private void ownerExitRoom(String requestBody) {
+		ServerMain.getInstance().sysoutGUI("ownerExit - updateRoomList");
+		
+		//notiRoomClosure
+		String roomName = (String) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
+		
+		ServerMain.roomList.forEach(room -> {
+			if(room.getRoomName().equals(roomName)) { //같은 방에 있는 사람들
+				room.getUserList().remove(this); //리스트에서 방장을 제거
+				
+				//방장제외 방 접속자
+				List<String> usernameList = new ArrayList<>(); 
+				
+				room.getUserList().forEach(con -> {
+					usernameList.add(con.username);
+				});
+				
+				room.getUserList().forEach(connectedSocket -> {
+					RequestBodyDto<String> notiRoomClosureDto
+						= new RequestBodyDto<String>("notiRoomClosure", null);
+					
+					ServerSender.getInstance().send(connectedSocket.socket, notiRoomClosureDto);
+				});
+			}
+		});
+		
+		//updateRoomList
+		ServerMain.connectedSocketList.forEach(connectedSocket -> {
+		});
+		
+		List<String> roomNameList = new ArrayList<>();
+		
+		/* if(ServerMain.roomList.indexOf(getRoomName().equals(roomName)) {
+			server.ServerMain.roomList.remove(this);
+		} */
+		
+		server.ServerMain.roomList.forEach(room -> {
+			roomNameList.add(room.getRoomName());
+		});
+		
+		RequestBodyDto<List<String>> updateRoomListRequestBodyDto 
+			= new RequestBodyDto<List<String>>("updateRoomList", roomNameList);
+		server.ServerMain.connectedSocketList.forEach(con -> {
+			ServerSender.getInstance().send(con.socket, updateRoomListRequestBodyDto);
+		});
+		
+		clearChat();
+	}
 	private void sendWhisper(String requestBody) {
 		
 	}
@@ -285,5 +324,16 @@ public class ConnectedSocket extends Thread {
 		// 반복으로 모든 접속자에게 전송
 
 		// <<< 케이스 메서드 끝 >>>
+	}
+	
+	//방 나갈때, 들어올때 채팅창을 초기화하는 요청
+	private void clearChat() {
+		RequestBodyDto<String> clearChattingDto = 
+				new RequestBodyDto<String>("clearChatting", null);
+		ServerSender.getInstance().send(socket, clearChattingDto);
+	}
+	
+	private void updateRoomList() {
+		
 	}
 }

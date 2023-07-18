@@ -23,8 +23,10 @@ import javax.swing.border.EmptyBorder;
 
 import com.google.gson.Gson;
 
+import lombok.Setter;
 import server.entity.Room;
 
+@Setter
 public class ServerMain extends JFrame {
 	
 	private static ServerMain instance;
@@ -42,7 +44,7 @@ public class ServerMain extends JFrame {
 	int userNum = 0;
 	String userNumString = Integer.toString(userNum);
 	
-	//서버 GUI 출력메서드 
+	//서버 GUI 출력 메서드 
 	public void sysoutGUI (String print) {
 		serverNotiTextArea.append(print + "\n");
 		System.out.println(print);
@@ -96,7 +98,7 @@ public class ServerMain extends JFrame {
 		serverNotiScrollPane.setBounds(12, 81, 310, 470);
 		mainPanel.add(serverNotiScrollPane);
 		
-		serverNotiTextArea = new JTextArea();
+        serverNotiTextArea = new JTextArea();
 		serverNotiTextArea.setText("소켓채팅 서버에 오신걸 환영합니다.\n");
 		serverNotiScrollPane.setViewportView(serverNotiTextArea);
 		
@@ -113,7 +115,7 @@ public class ServerMain extends JFrame {
 			}
 		});
 		ServerStartButton.setFont(new Font("나눔고딕 ExtraBold", Font.PLAIN, 15));
-		ServerStartButton.setBounds(26, 20, 94, 39);
+		ServerStartButton.setBounds(26, 20, 108, 39);
 		mainPanel.add(ServerStartButton);
 		
 		// <<< 라벨 >>>
@@ -213,6 +215,6 @@ public class ServerMain extends JFrame {
 			System.exit(0);
         } catch (IOException e) {
             sysoutGUI("서버 종료에 실패: " + e.getMessage());
-        }
+        } 
     }
 }
