@@ -2,6 +2,7 @@ package client;
 
 import java.awt.CardLayout;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.KeyAdapter;
@@ -48,6 +49,7 @@ public class ClientMain extends JFrame {
 	private Socket socket;
 	private boolean isOwner = true;
 	private boolean isRoomCreator = false;
+	private Object createdRoomName;
 	
 	private CardLayout mainCardLayout;
 	private JPanel mainCardPanel;
@@ -249,7 +251,18 @@ public class ClientMain extends JFrame {
 		
 		userListModel = new DefaultListModel<>();
 		userList = new JList(userListModel);
+		userList.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount() == 2) {
+					String username = userListModel.get(userList.getSelectedIndex());
+					RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("join", username);
+					ClientSender.getInstance().send(requestBodyDto);
+				}
+			}
+		});
 		userListScrollPane.setViewportView(userList);
+		//귓속말
 		
 		roomNameTextField = new JTextField();
 		roomNameTextField.setText("임시용"); //
@@ -286,12 +299,23 @@ public class ClientMain extends JFrame {
 					if(JOptionPane.showConfirmDialog(null, "정말로 방을 나가시겠습니까?", "방 나가기", JOptionPane.YES_NO_OPTION) == 0) {
 						
 						if(isRoomCreator) {
+							// 방장이 만든 방 이름 저장
+//		                    createdRoomName = roomNameTextField.getText();
+		                    
 							JOptionPane.showMessageDialog(null, "방장이 나갔습니다.", "방나가짐", JOptionPane.ERROR_MESSAGE);
 							chattingTextArea.setText("");
 							mainCardLayout.show(mainCardPanel, "chattingRoomListPanel");
-							String roomName = roomListModel.get(roomList.getSelectedIndex());
-							RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("ownerExitRoom", roomName);
-                            ClientSender.getInstance().send(requestBodyDto);
+							
+							createdRoomName = roomNameTextField.getSelectedText();
+			                    
+			                // 방 목록에서 방 제거
+			                ClientMain.getInstance().getChattingRoomListPanel().remove(roomList);
+							
+		                    // 방장이 나갔음을 서버에 알림
+		                    RequestBodyDto<Object> requestBodyDto = new RequestBodyDto<>("ownerExitRoom", createdRoomName);
+		                    ClientSender.getInstance().send(requestBodyDto);
+		                    
+		                   
                             
 						} else {
 							chattingTextArea.setText("");
@@ -318,6 +342,10 @@ public class ClientMain extends JFrame {
 		
 		
 		
+	}
+
+	protected DefaultListModel<String> getRoomNameList() {
+		return null;
 	}
 
 	public void setRoomCreator(boolean b) {

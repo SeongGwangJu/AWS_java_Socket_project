@@ -74,11 +74,9 @@ public class ClientReceiver extends Thread {
 			    break;
 			    
 			case "ownerExitRoom":
-			    ClientMain.getInstance().setRoomCreator(false);
+				String newRoom = (String) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
+				ClientMain.getInstance().getRoomListModel().removeElement(newRoom);
 			    
-			    List<String> updatedRoomList = (List<String>) ((RequestBodyDto) gson.fromJson(requestBody, new TypeToken<RequestBodyDto<List<String>>>(){}.getType())).getBody();
-			    ClientMain.getInstance().getRoomListModel().clear();
-			    ClientMain.getInstance().getRoomListModel().addAll(updatedRoomList);
 			    break;
 		}
 	}
