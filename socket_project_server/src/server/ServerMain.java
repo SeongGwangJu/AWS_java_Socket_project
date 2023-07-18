@@ -23,8 +23,10 @@ import javax.swing.border.EmptyBorder;
 
 import com.google.gson.Gson;
 
+import lombok.Setter;
 import server.entity.Room;
 
+@Setter
 public class ServerMain extends JFrame {
 	
 	private static ServerMain instance;
@@ -96,7 +98,7 @@ public class ServerMain extends JFrame {
 		serverNotiScrollPane.setBounds(12, 81, 310, 470);
 		mainPanel.add(serverNotiScrollPane);
 		
-		serverNotiTextArea = new JTextArea();
+        serverNotiTextArea = new JTextArea();
 		serverNotiTextArea.setText("소켓채팅 서버에 오신걸 환영합니다.\n");
 		serverNotiScrollPane.setViewportView(serverNotiTextArea);
 		
