@@ -75,12 +75,19 @@ public class ClientReceiver extends Thread {
 			    break; */
 			    
 			case "notiRoomClosure": //알림창 + 화면이동
+
 				JOptionPane.showMessageDialog(ClientMain.getInstance().getChattingRoomPanel(), "방장이 나갔습니다.", "방나가짐", JOptionPane.ERROR_MESSAGE);
 				ClientMain.getInstance().getMainCardLayout().show(ClientMain.getInstance().getMainCardPanel(), "chattingRoomListPanel");
+			    break;
+			
+			case "sendWhisper":
+				ClientMain.getInstance().getMessageTextField();
 			    break;
 			    
 			case "clearChat" : 
 				ClientMain.getInstance().getChattingTextArea().setText("");
+				
+				break;
 				
 		}
 	}

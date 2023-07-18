@@ -2,6 +2,7 @@ package client;
 
 import java.awt.CardLayout;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.KeyAdapter;
@@ -48,7 +49,6 @@ public class ClientMain extends JFrame {
 	private String username;
 	private Socket socket;
 	private boolean isOwner; //방만들면 true, join하면 false
-	
 	
 	private CardLayout mainCardLayout;
 	private JPanel mainCardPanel;
@@ -195,10 +195,12 @@ public class ClientMain extends JFrame {
 					//userListModel.clear();
 					//userList.removeAll();
 					roomName = roomListModel.get(roomList.getSelectedIndex());
+					
+					ClientMain.getInstance().getUserList().removeAll();
+					
 					mainCardLayout.show(mainCardPanel, "chattingRoomPanel");
 					RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("join", roomName);
 					ClientSender.getInstance().send(requestBodyDto);
-					
 					// 방제목 표시 및 채팅방 초기화
 					roomNameTextField.setText(roomName);
 					
@@ -270,6 +272,16 @@ public class ClientMain extends JFrame {
 
 		userListModel = new DefaultListModel<>();
 		userList = new JList(userListModel);
+		userList.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount() == 2) {
+					String username = userListModel.get(userList.getSelectedIndex());
+					RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("join", username);
+					ClientSender.getInstance().send(requestBodyDto);
+				}
+			}
+		});
 		userListScrollPane.setViewportView(userList);
 
 		// 채팅방 상단 방제표시

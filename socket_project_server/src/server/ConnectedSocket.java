@@ -256,6 +256,7 @@ public class ConnectedSocket extends Thread {
 		RequestBodyDto<?> requestBodyDto = gson.fromJson(requestBody, RequestBodyDto.class);
 		
 		
+
 		for(Room room : ServerMain.roomList) {
 			if(room.getRoomName().equals((String) requestBodyDto.getBody())) {
 				room.getUserList().forEach(con -> {
