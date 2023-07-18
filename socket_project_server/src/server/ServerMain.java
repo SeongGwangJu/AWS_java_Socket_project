@@ -23,14 +23,14 @@ import javax.swing.border.EmptyBorder;
 
 import com.google.gson.Gson;
 
+import lombok.Data;
 import lombok.Setter;
 import server.entity.Room;
 
-@Setter
+@Data
 public class ServerMain extends JFrame {
 	
 	private static ServerMain instance;
-
 	public static ServerMain getInstance() {
 	    if (instance == null) {
 	        instance = new ServerMain();
@@ -45,14 +45,15 @@ public class ServerMain extends JFrame {
 	String userNumString = Integer.toString(userNum);
 	
 	//서버 GUI 출력 메서드 
-	public void sysoutGUI (String print) {
+	public static void sysoutGUI (String print) {
 		serverNotiTextArea.append(print + "\n");
 		System.out.println(print);
+		
 	}
 	
 	//필드
 	private JPanel mainPanel;
-	private JTextArea serverNotiTextArea;
+	private static JTextArea serverNotiTextArea;
 	private ServerSocket serverSocket;
 	private Socket socket;
 	private JTextArea userNumArea;
@@ -61,6 +62,7 @@ public class ServerMain extends JFrame {
 	public static List<ConnectedSocket> connectedSocketList = new ArrayList<>();
 	public static List<Room> roomList = new ArrayList<>();
 
+	
 	public static void main(String[] args) {
 		
 		//GUI표시
@@ -99,7 +101,7 @@ public class ServerMain extends JFrame {
 		mainPanel.add(serverNotiScrollPane);
 		
         serverNotiTextArea = new JTextArea();
-		serverNotiTextArea.setText("소켓채팅 서버에 오신걸 환영합니다.\n");
+		sysoutGUI("소켓채팅 서버에 오신걸 환영합니다.\n");
 		serverNotiScrollPane.setViewportView(serverNotiTextArea);
 		
 		// <<< 서버시작 버튼 >>>
@@ -171,7 +173,7 @@ public class ServerMain extends JFrame {
 				
 				try {
 		            serverSocket = new ServerSocket(port);
-		            sysoutGUI("서버 시작: 포트 "+ port +"번 에서 연결을 시도합니다.");
+		            sysoutGUI("포트 "+ port +"번으로 서버를 열었습니다.");
 
 		        	userNumArea.setText("" + userNum);
 		            while(true) {
@@ -180,8 +182,9 @@ public class ServerMain extends JFrame {
 						connectedSocket.start();
 						connectedSocketList.add(connectedSocket);
 		            	userNum += 1;
-
-						sysoutGUI("클라이언트" +userNum+" 연결됨"); //나중에 username으로 수정해야함 완성후!
+		            	
+		            	//if(!ConnectedSocket.get  == null)
+						//sysoutGUI("클라이언트" +userNum+" 연결됨" ); //나중에 username으로 수정해야함 완성후!
 						
 		            	//접속자 수 업데이트, EDT(EventDispatchThread)사용.
 	                    EventQueue.invokeLater(new Runnable() {
@@ -193,7 +196,7 @@ public class ServerMain extends JFrame {
 				} catch (BindException e){ 
 					sysoutGUI("서버시작 실패 : 서버가 이미 실행중입니다.");
 		        } catch (IOException e) {
-		            System.out.println("IO Exception in startServer()" + e.getMessage());
+
 		        }
 			}
 			
@@ -211,10 +214,9 @@ public class ServerMain extends JFrame {
             if (this.serverSocket != null) {
                 this.serverSocket.close();
             }
-            sysoutGUI("서버가 종료되었습니다.\n");
-			System.exit(0);
+            sysoutGUI("서버가 종료되었습니다.");
         } catch (IOException e) {
-            sysoutGUI("서버 종료에 실패: " + e.getMessage());
+            //sysoutGUI("서버 종료에 실패: " + e.getMessage());
         } 
     }
 }

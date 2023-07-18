@@ -68,19 +68,18 @@ public class ClientReceiver extends Thread {
 				ClientMain.getInstance().getUserListModel().addAll(usernameList);
 				break;
 				
-			case "exitRoom":
-				String roomName = (String) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
+			/* case "exitRoom":
+				roomList = (List<String>) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
 				ClientMain.getInstance().getRoomListModel().clear();
-			    break;
+				ClientMain.getInstance().getRoomListModel().addAll(roomList);
+			    break; */
 			    
-			case "notiRoomClosure":
+			case "notiRoomClosure": //알림창 + 화면이동
 				JOptionPane.showMessageDialog(ClientMain.getInstance().getChattingRoomPanel(), "방장이 나갔습니다.", "방나가짐", JOptionPane.ERROR_MESSAGE);
 				ClientMain.getInstance().getMainCardLayout().show(ClientMain.getInstance().getMainCardPanel(), "chattingRoomListPanel");
-				
 			    break;
 			    
-			//exit or join시  채팅방 내용을 지움
-			case "clearChatting" : 
+			case "clearChat" : 
 				ClientMain.getInstance().getChattingTextArea().setText("");
 				
 		}

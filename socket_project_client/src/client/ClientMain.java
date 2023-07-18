@@ -170,6 +170,7 @@ public class ClientMain extends JFrame {
 
 				// 방제목 표시(방장용)
 				roomNameTextField.setText(roomName);
+				
 				mainCardLayout.show(mainCardPanel, "chattingRoomPanel");
 				requestBodyDto = new RequestBodyDto<String>("join", roomName);
 				ClientSender.getInstance().send(requestBodyDto);
@@ -191,14 +192,17 @@ public class ClientMain extends JFrame {
 					isOwner = false; //join 시 방장이 아님
 					
 					//roomName을 서버에 전송
+					//userListModel.clear();
+					//userList.removeAll();
 					roomName = roomListModel.get(roomList.getSelectedIndex());
 					mainCardLayout.show(mainCardPanel, "chattingRoomPanel");
 					RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("join", roomName);
 					ClientSender.getInstance().send(requestBodyDto);
 					
-					// 방제목 표시
+					// 방제목 표시 및 채팅방 초기화
 					roomNameTextField.setText(roomName);
 					
+					getChattingTextArea().setText("");
 				}
 			}
 		});
@@ -312,16 +316,24 @@ public class ClientMain extends JFrame {
 						if(JOptionPane.showConfirmDialog(chattingRoomPanel, 
 								"방이 사라집니다. 정말 나가시겠습니까?", "방 나가기(방장)", JOptionPane.YES_NO_OPTION) == 0) {
 							mainCardLayout.show(mainCardPanel, "chattingRoomListPanel");
+//							requestBodyDto = new RequestBodyDto<String>("exitRoom", roomName);
+							
+//							ClientSender.getInstance().send(requestBodyDto); 
+//							try {
+//								Thread.sleep(100);
+//							} catch(InterruptedException e2) {
+//								e2.printStackTrace();
+//							}
 							requestBodyDto = new RequestBodyDto<String>("ownerExitRoom", roomName);
 						}
-
-	
+						
 					//방장이 아닌경우
 					} else {
 							mainCardLayout.show(mainCardPanel, "chattingRoomListPanel");
 							requestBodyDto = new RequestBodyDto<String>("exitRoom", roomName);
 					}	
 					ClientSender.getInstance().send(requestBodyDto); //서버로 roomName 전송
+					getChattingTextArea().setText("");
 				}
 
 					
