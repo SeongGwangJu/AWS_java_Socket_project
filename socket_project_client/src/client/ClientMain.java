@@ -9,7 +9,10 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.util.List;
 import java.util.Objects;
@@ -31,8 +34,10 @@ import javax.swing.border.EmptyBorder;
 import client.dto.RequestBodyDto;
 import client.dto.SendMessage;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class ClientMain extends JFrame {
 
 	private static ClientMain instance;
@@ -82,9 +87,6 @@ public class ClientMain extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					/*
-					 * ClientMain frame = new ClientMain(); frame.setVisible(true);
-					 */
 					ClientMain frame = ClientMain.getInstance();
 					frame.setVisible(true);
 
@@ -95,6 +97,7 @@ public class ClientMain extends JFrame {
 					RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("connection", frame.username);
 					ClientSender.getInstance().send(requestBodyDto);
 
+	
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -113,13 +116,19 @@ public class ClientMain extends JFrame {
 		if (username.isBlank()) {
 			System.exit(0);
 		}
+		//아이디 중복 검증 :방장을 id로 식별하기때문에 검증 해야 방장 중복을 피할 수 있음. 근데 서버 통해야함..
+//		if (username.equals) { 
+		
 		// 소켓 접속
 		try {
 			socket = new Socket(ip, port);
-		} catch (IOException e) {
+		}catch(ConnectException e) {
+			System.out.println("서버를 시작해주세요.");
+		}catch (IOException e) {
 			e.printStackTrace();
 		}
 
+	
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 320, 600);
 
@@ -154,7 +163,7 @@ public class ClientMain extends JFrame {
 							JOptionPane.ERROR_MESSAGE);
 					return;
 				}
-		        isOwner = true;
+		        
 		        
 				for(int i = 0; i < roomListModel.size(); i++) {
 					if(roomListModel.get(i).equals(roomName)) {
@@ -164,9 +173,10 @@ public class ClientMain extends JFrame {
 					}
 				}
 				
-				// 방만들면 "createRoom"(roomName), "join"(roomName) 전송
-				RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("createRoom", roomName);
+				// 방만들면 "createRoom" : 룸리스트 업데이트, "join" : 유저리스트 업데이트
+				RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("createRoom", roomName); 
 				ClientSender.getInstance().send(requestBodyDto);
+				isOwner = true;
 
 				// 방제목 표시(방장용)
 				roomNameTextField.setText(roomName);
@@ -189,14 +199,11 @@ public class ClientMain extends JFrame {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
-					isOwner = false; //join 시 방장이 아님
+					isOwner = false; //join 시에는 방장이 아님
 					
 					//roomName을 서버에 전송
-					//userListModel.clear();
-					//userList.removeAll();
 					roomName = roomListModel.get(roomList.getSelectedIndex());
-					
-					ClientMain.getInstance().getUserList().removeAll();
+					//ClientMain.getInstance().getUserList().removeAll();
 					
 					mainCardLayout.show(mainCardPanel, "chattingRoomPanel");
 					RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("join", roomName);
@@ -225,7 +232,7 @@ public class ClientMain extends JFrame {
 		// 유저 아이콘
 		userIcon = new JLabel("");
 		userIcon.setIcon(
-				new ImageIcon("C:\\aws\\java\\workspace\\socket_project\\socket_project_client\\src\\userIcon.png"));
+				new ImageIcon(ClientMain.class.getResource("/icon/userIcon.png")));
 
 		userIcon.setBounds(12, 8, 35, 35);
 		chattingRoomListPanel.add(userIcon);
@@ -298,7 +305,7 @@ public class ClientMain extends JFrame {
 		// 아이콘
 		roomNameIcon = new JLabel("");
 		roomNameIcon.setIcon(
-				new ImageIcon("C:\\aws\\java\\workspace\\socket_project\\socket_project_client\\src\\userIcon.png"));
+				new ImageIcon("socket_project_client\\src\\userIcon.png"));
 		roomNameIcon.setBounds(12, 8, 35, 35);
 		chattingRoomPanel.add(roomNameIcon);
 
@@ -327,24 +334,19 @@ public class ClientMain extends JFrame {
 					if(isOwner) {
 						if(JOptionPane.showConfirmDialog(chattingRoomPanel, 
 								"방이 사라집니다. 정말 나가시겠습니까?", "방 나가기(방장)", JOptionPane.YES_NO_OPTION) == 0) {
-							mainCardLayout.show(mainCardPanel, "chattingRoomListPanel");
-//							requestBodyDto = new RequestBodyDto<String>("exitRoom", roomName);
-							
-//							ClientSender.getInstance().send(requestBodyDto); 
-//							try {
-//								Thread.sleep(100);
-//							} catch(InterruptedException e2) {
-//								e2.printStackTrace();
-//							}
 							requestBodyDto = new RequestBodyDto<String>("ownerExitRoom", roomName);
-						}
+							ClientSender.getInstance().send(requestBodyDto);
+							mainCardLayout.show(mainCardPanel, "chattingRoomListPanel");
+							
+						} return;
 						
 					//방장이 아닌경우
 					} else {
 							mainCardLayout.show(mainCardPanel, "chattingRoomListPanel");
 							requestBodyDto = new RequestBodyDto<String>("exitRoom", roomName);
+							ClientSender.getInstance().send(requestBodyDto);
 					}	
-					ClientSender.getInstance().send(requestBodyDto); //서버로 roomName 전송
+					 //서버로 roomName 전송
 					getChattingTextArea().setText("");
 				}
 
@@ -360,6 +362,20 @@ public class ClientMain extends JFrame {
 		roomOwnerLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		roomOwnerLabel.setBounds(180, 6, 57, 35);
 		chattingRoomPanel.add(roomOwnerLabel);
+		//종료시 예외처리
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				RequestBodyDto<String> quitDto = new RequestBodyDto<String>("quitWindow", username);
+				ClientSender.getInstance().send(quitDto);	
+				try {
+					socket.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				System.exit(0);
+			}
+		});
 
 	}
 

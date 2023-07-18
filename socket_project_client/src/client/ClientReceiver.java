@@ -4,14 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.SocketException;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.JOptionPane;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import client.dto.RequestBodyDto;
 
@@ -29,11 +26,9 @@ public class ClientReceiver extends Thread {
 					requestBody = bufferedReader.readLine();
 					
 				}
-				 catch (SocketException e) {
-						System.out.println("서버소켓이 닫혔습니다.\n시스템을 종료합니다.");
-						clientMain.dispose();
+				 catch (SocketException e) { //소켓이 닫혀있는 경우
+					 	System.out.println("SocketException. 클라이언트를 종료합니다.");
 						System.exit(0);
-						
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -67,7 +62,7 @@ public class ClientReceiver extends Thread {
 				ClientMain.getInstance().getUserListModel().clear();
 				ClientMain.getInstance().getUserListModel().addAll(usernameList);
 				break;
-				
+				  
 			/* case "exitRoom":
 				roomList = (List<String>) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
 				ClientMain.getInstance().getRoomListModel().clear();
@@ -86,9 +81,21 @@ public class ClientReceiver extends Thread {
 			    
 			case "clearChat" : 
 				ClientMain.getInstance().getChattingTextArea().setText("");
-				
 				break;
-				
+			case "duplicationTest" :  //미완성
+				System.out.println("duplicationTestStart"); //testprint
+				List<String> duplicationTestList =(List<String>) gson.fromJson(requestBody, RequestBodyDto.class).getBody();
+				int[] count = {0};
+				duplicationTestList.forEach(userName -> {
+					if(userName.equals(ClientMain.getInstance().getUsername())) {
+						count[0] += +1;
+						//count 값이 1이면 리스트와 겹치는게 하나니까 정상
+						if(count[0] == 2) { //2개면 중복
+							JOptionPane.showMessageDialog(ClientMain.getInstance().getChattingRoomPanel(), "아이디가 중복되었습니다.", "아이디 중복", JOptionPane.ERROR_MESSAGE);
+							ClientMain.getInstance().setUsername(JOptionPane.showInputDialog(null, "아이디를 입력하세요."));
+						}
+					}
+				});
 		}
 	}
 	

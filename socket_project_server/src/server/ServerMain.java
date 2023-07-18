@@ -24,29 +24,27 @@ import javax.swing.border.EmptyBorder;
 import com.google.gson.Gson;
 
 import lombok.Data;
-import lombok.Setter;
 import server.entity.Room;
 
 @Data
 public class ServerMain extends JFrame {
 	
 	private static ServerMain instance;
-	public static ServerMain getInstance() {
-	    if (instance == null) {
-	        instance = new ServerMain();
-	    }
-	    return instance;
-	}
+
 
 	//ip / port설정
 	String ip = "127.0.0.1";
 	int port = 8000;
 	int userNum = 0;
-	String userNumString = Integer.toString(userNum);
 	
 	//서버 GUI 출력 메서드 
 	public static void sysoutGUI (String print) {
-		serverNotiTextArea.append(print + "\n");
+		EventQueue.invokeLater(new Runnable() {
+            public void run() {
+            	serverNotiTextArea.append(print + "\n");
+            }
+        });
+		
 		System.out.println(print);
 		
 	}
@@ -56,7 +54,7 @@ public class ServerMain extends JFrame {
 	private static JTextArea serverNotiTextArea;
 	private ServerSocket serverSocket;
 	private Socket socket;
-	private JTextArea userNumArea;
+	public JTextArea userNumArea;
 	private Gson gson;
 	
 	public static List<ConnectedSocket> connectedSocketList = new ArrayList<>();
@@ -101,7 +99,6 @@ public class ServerMain extends JFrame {
 		mainPanel.add(serverNotiScrollPane);
 		
         serverNotiTextArea = new JTextArea();
-		sysoutGUI("소켓채팅 서버에 오신걸 환영합니다.\n");
 		serverNotiScrollPane.setViewportView(serverNotiTextArea);
 		
 		// <<< 서버시작 버튼 >>>
@@ -160,7 +157,6 @@ public class ServerMain extends JFrame {
 		userNumArea.setBounds(208, 56, 56, 15);
 		mainPanel.add(userNumArea);
 		userNumArea.setText("" + userNum); //접속자수 표시
-		
 	}
 	
 	// <<< 서버시작기능 >>>
@@ -214,7 +210,12 @@ public class ServerMain extends JFrame {
             if (this.serverSocket != null) {
                 this.serverSocket.close();
             }
-            sysoutGUI("서버가 종료되었습니다.");
+            sysoutGUI("서버가 종료되었습니다.");		
+            EventQueue.invokeLater(new Runnable() {
+                public void run() {
+                	serverNotiTextArea.removeAll();
+                }
+            });
         } catch (IOException e) {
             //sysoutGUI("서버 종료에 실패: " + e.getMessage());
         } 
