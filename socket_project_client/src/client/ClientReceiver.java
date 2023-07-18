@@ -78,10 +78,16 @@ public class ClientReceiver extends Thread {
 				ClientMain.getInstance().getMainCardLayout().show(ClientMain.getInstance().getMainCardPanel(), "chattingRoomListPanel");
 				
 			    break;
+			
+			case "sendWhisper":
+				ClientMain.getInstance().getMessageTextField();
+			    break;
 			    
 			//exit or join시  채팅방 내용을 지움
 			case "clearChatting" : 
 				ClientMain.getInstance().getChattingTextArea().setText("");
+				
+				break;
 				
 		}
 	}

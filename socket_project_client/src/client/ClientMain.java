@@ -192,12 +192,15 @@ public class ClientMain extends JFrame {
 					
 					//roomName을 서버에 전송
 					roomName = roomListModel.get(roomList.getSelectedIndex());
+					
+					ClientMain.getInstance().getUserList().removeAll();
+					
 					mainCardLayout.show(mainCardPanel, "chattingRoomPanel");
 					RequestBodyDto<String> requestBodyDto = new RequestBodyDto<String>("join", roomName);
 					ClientSender.getInstance().send(requestBodyDto);
-					
 					// 방제목 표시
 					roomNameTextField.setText(roomName);
+					
 					
 				}
 			}

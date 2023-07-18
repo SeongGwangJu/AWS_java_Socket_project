@@ -259,7 +259,7 @@ public class ConnectedSocket extends Thread {
 				room.getUserList().remove(this); //리스트에서 방장을 제거
 				
 				//방장제외 방 접속자
-				List<String> usernameList = new ArrayList<>(); 
+				List<String> usernameList = new ArrayList<>();
 				
 				room.getUserList().forEach(con -> {
 					usernameList.add(con.username);
